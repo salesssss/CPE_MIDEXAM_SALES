@@ -1,0 +1,154 @@
+- hosts: all
+  become: true
+  pre_tasks:
+    - name: Install updates (Ubuntu)
+      apt:
+        upgrade: dist
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install updates (CentOS)
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: Add Elasticsearch repository key (Ubuntu)
+      apt_key:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add Elasticsearch repository (Ubuntu)
+      apt_repository:
+        repo: deb https://artifacts.elastic.co/packages/7.x/apt stable main
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add Elasticsearch repository (CentOS)
+      yum_repository:
+        name: elasticsearch
+        description: Elasticsearch Repository
+        baseurl: https://artifacts.elastic.co/packages/7.x/yum
+        gpgcheck: yes
+        gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: Debug - Check if Grafana repository is added (Ubuntu)
+      debug:
+        msg: "Grafana repository is added successfully on Ubuntu."
+      when: ansible_distribution == "Ubuntu" and ansible_facts.packages["grafana"] is defined
+
+    - name: Debug - Check if Grafana repository is added (CentOS)
+      debug:
+        msg: "Grafana repository is added successfully on CentOS."
+      when: ansible_distribution == "CentOS" and ansible_facts.packages["grafana"] is defined
+
+- hosts: db_server
+  become: true
+  tasks:
+    - name: Install Nagios on Ubuntu
+      apt:
+        name: nagios4
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Nagios on CentOS
+      yum:
+        name: nagios
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
+
+- hosts: web_server
+  become: true
+  tasks:
+    - name: Install Elastic Stack on Ubuntu
+      apt:
+        name:
+          - elasticsearch
+          - kibana
+          - logstash
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Elastic Stack on CentOS
+      yum:
+        name:
+          - elasticsearch
+          - kibana
+          - logstash
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
+
+- hosts: workstations
+  become: true
+  tasks:
+    - name: Install Grafana on Ubuntu
+      apt:
+        name: grafana
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Grafana on CentOS
+      yum:
+        name: grafana
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: Install Prometheus on Ubuntu
+      apt:
+        name: prometheus
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Prometheus on CentOS
+      yum:
+        name: prometheus
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: Install InfluxDB on Ubuntu
+      apt:
+        name: influxdb
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install InfluxDB on CentOS
+      yum:
+        name: influxdb
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
+
+- hosts: file_server
+  become: true
+  tasks:
+    - name: Install Lamp Stack on Ubuntu
+      apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+          - mariadb-server
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Lamp Stack on CentOS
+      yum:
+        name:
+          - httpd
+          - php
+          - mariadb-server
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
